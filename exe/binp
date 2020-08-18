@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+require_relative '../lib/binp/cli/main.rb'
+
+if __FILE__ == $0
+  Main.run(ARGV)
+end
+

@@ -1,0 +1,5 @@
+- name: UINT16_12345
+  type: UINT16
+  offset: 0
+  size: 2
+  endianness: BIG
