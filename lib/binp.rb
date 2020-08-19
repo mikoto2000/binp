@@ -40,33 +40,33 @@ class BinParserElement
   # see: https://docs.ruby-lang.org/ja/latest/doc/pack_template.html
   def self.calculate_unpack_template_string(type, endianness)
 
-    # “Áê‚ÈğŒ
+    # ç‰¹æ®Šãªæ¡ä»¶
     case type
     when BinParserElement::Type::UINT16
       if endianness == BinParserElement::Endianness::BIG_ENDIAN
-        # ƒrƒbƒOƒGƒ“ƒfƒBƒAƒ“A•„†‚È‚µ 16 bit ®”
+        # ãƒ“ãƒƒã‚°ã‚¨ãƒ³ãƒ‡ã‚£ã‚¢ãƒ³ã€ç¬¦å·ãªã— 16 bit æ•´æ•°
         return 'n'
       else
-        # ƒŠƒgƒ‹ƒGƒ“ƒfƒBƒAƒ“A•„†‚È‚µ 16 bit ®”
+        # ãƒªãƒˆãƒ«ã‚¨ãƒ³ãƒ‡ã‚£ã‚¢ãƒ³ã€ç¬¦å·ãªã— 16 bit æ•´æ•°
         return 'v'
       end
     when BinParserElement::Type::UINT32
       if endianness == BinParserElement::Endianness::BIG_ENDIAN
-        # ƒrƒbƒOƒGƒ“ƒfƒBƒAƒ“A•„†‚ ‚è 32 bit ®”
+        # ãƒ“ãƒƒã‚°ã‚¨ãƒ³ãƒ‡ã‚£ã‚¢ãƒ³ã€ç¬¦å·ã‚ã‚Š 32 bit æ•´æ•°
         return 'N'
       else
-        # ƒŠƒgƒ‹ƒGƒ“ƒfƒBƒAƒ“A•„†‚ ‚è 32 bit ®”
+        # ãƒªãƒˆãƒ«ã‚¨ãƒ³ãƒ‡ã‚£ã‚¢ãƒ³ã€ç¬¦å·ã‚ã‚Š 32 bit æ•´æ•°
         return 'V'
       end
     when BinParserElement::Type::UINT8
-      # •„†‚È‚µ 8 bit ®”
+      # ç¬¦å·ãªã— 8 bit æ•´æ•°
       return 'C'
     when BinParserElement::Type::INT8
-      # •„†‚ ‚è 8 bit ®”
+      # ç¬¦å·ã‚ã‚Š 8 bit æ•´æ•°
       return 'c'
     end
 
-    # ‚»‚Ì‘¼
+    # ãã®ä»–
     type[:value] + endianness[:value]
   end
 
