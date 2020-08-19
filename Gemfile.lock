@@ -2,11 +2,13 @@ PATH
   remote: .
   specs:
     binp (1.0.1)
+      formatador
 
 GEM
   remote: https://rubygems.org/
   specs:
     docile (1.3.2)
+    formatador (0.2.5)
     power_assert (1.2.0)
     rake (12.3.3)
     simplecov (0.18.5)

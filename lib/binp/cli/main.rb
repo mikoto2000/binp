@@ -1,4 +1,5 @@
 # encoding: UTF-8
+require 'formatador'
 require 'json'
 require 'optparse'
 require 'yaml'
@@ -18,11 +19,12 @@ class Main
     raw_result = BinParser.parse(uint8_array, config)
 
     # 出力用に加工して出力
-    puts raw_result.map { |e|
+    result = raw_result.map { |e|
       e['type'] = e['type'][:name]
       e['endianness'] = e['endianness'][:name]
       e
-    }.to_json.to_s
+    }
+    Formatador.display_compact_table(result)
   end
 
   def self.parse_option(argv)
