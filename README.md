@@ -80,7 +80,7 @@ $ ruby binary_parser.rb -c setting.yaml example.bin | jq '.'
 
 # TODO:
 
-- [ ] : テーブル形式で表示
+- [x] : テーブル形式で表示
 - [ ] : 文字列型サポート
     - [ ] : UTF8
 - [ ] : ビットフラグサポート

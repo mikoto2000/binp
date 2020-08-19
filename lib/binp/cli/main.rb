@@ -24,14 +24,20 @@ class Main
       e['endianness'] = e['endianness'][:name]
       e
     }
+    if  !opts[:all]
+        result.map! { |e| { 'name' => e['name'], 'value' => e['value']} }
+    end
     Formatador.display_compact_table(result)
   end
 
   def self.parse_option(argv)
-    options = {}
+    options = {
+        all: false
+    }
     op = OptionParser.new
 
     op.on('-c VALUE', '--config VALUE', '設定ファイルパス') { |v| options[:config] = v }
+    op.on('-a', '--all', 'name, value 以外のすべての項目(endianness, offset, size, type)を表示する') { |v| options[:all] = true }
     op.parse!(argv)
 
     [options, argv]
