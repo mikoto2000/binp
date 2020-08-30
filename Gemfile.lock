@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    binp (2.0.0)
+    binp (3.0.0)
       formatador
 
 GEM
