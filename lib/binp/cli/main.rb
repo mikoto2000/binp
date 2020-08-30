@@ -21,7 +21,14 @@ class Main
     # 出力用に加工して出力
     result = raw_result.map { |e|
       e['type'] = e['type'][:name]
-      e['endianness'] = e['endianness'][:name]
+
+      # FLAGS では endianness が無い場合があるのでチェックしてから設定
+      if e['endianness']
+        e['endianness'] = e['endianness'][:name]
+      end
+
+      # layout は出力量が多すぎるので削除
+      e.delete('layout')
       e
     }
     if  !opts[:all]
@@ -65,11 +72,13 @@ class Main
       }
 
       # YAML 記載の endianness に対応した Endianness オブジェクトに差し替える
-      if endianness
-        e['endianness'] = BinParserElement::Endianness.const_get(endianness)
-      else
-        STDERR.puts "#{i} 番目の endianness の値が不正です('#{e['endianness']}')。LITTLE or BIG を指定してください。"
-        exit(1)
+      if e['type'] != BinParserElement::Type::FLAGS
+        if endianness
+          e['endianness'] = BinParserElement::Endianness.const_get(endianness)
+        else
+          STDERR.puts "#{i} 番目の endianness の値が不正です('#{e['endianness']}')。LITTLE or BIG を指定してください。"
+          exit(1)
+        end
       end
     }
 

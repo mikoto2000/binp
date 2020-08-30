@@ -158,5 +158,37 @@ class TestBinaryParserElement < Test::Unit::TestCase
       assert_equal(12345, actual)
     end
   end
+
+  sub_test_case "get_flags" do
+    test "data: '\\AA' " do
+      data = [170]
+
+      config = {
+          'name' => 'test',
+          'offset' => 0,
+          'type' => 'FLAGS',
+          'layout' => [
+              { 'name' => 'LED1', 'position' => 0 }, # 0
+              { 'name' => 'LED2', 'position' => 1 }, # 1
+              { 'name' => 'LED3', 'position' => 2 }, # 0
+              { 'name' => 'LED4', 'position' => 3 }, # 1
+              { 'name' => 'LED5', 'position' => 4 }, # 0
+              { 'name' => 'LED6', 'position' => 5 }, # 1
+              { 'name' => 'LED7', 'position' => 6 }, # 0
+              { 'name' => 'LED8', 'position' => 7 }  # 1
+          ]
+      }
+
+      actual = BinParserElement.get_flags(data, config)
+      assert_equal('OFF', actual[0]['value'])
+      assert_equal('ON', actual[1]['value'])
+      assert_equal('OFF', actual[2]['value'])
+      assert_equal('ON', actual[3]['value'])
+      assert_equal('OFF', actual[4]['value'])
+      assert_equal('ON', actual[5]['value'])
+      assert_equal('OFF', actual[6]['value'])
+      assert_equal('ON', actual[7]['value'])
+    end
+  end
 end
 

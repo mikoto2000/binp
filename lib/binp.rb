@@ -3,8 +3,13 @@ require "binp/version"
 
 class BinParser
   def self.parse(uint8_array, config)
-    config.map { |e|
-      e['value'] = BinParserElement.get_value(uint8_array, e['offset'], e['size'], e['type'], e['endianness'])
+    config.flat_map { |e|
+      # ビットフラグかどうかを確認
+      if e['type'] == BinParserElement::Type::FLAGS
+        e = BinParserElement.get_flags(uint8_array, e)
+      else
+        e['value'] = BinParserElement.get_value(uint8_array, e['offset'], e['size'], e['type'], e['endianness'])
+      end
       e
     }
   end
@@ -79,6 +84,28 @@ class BinParserElement
     pack_template_string = calculate_pack_template_string(size)
     unpack_template_string = calculate_unpack_template_string(type, endianness)
     target.pack(pack_template_string).unpack(unpack_template_string)[0]
+  end
+
+  def self.get_flags(uint8_array, config)
+    offset = config['offset']
+    layout = config['layout']
+    target = uint8_array.slice(offset, 1)
+    layout.map { |e|
+      c = config.dup
+      c['name'] = e['name']
+
+      # ビットが立っているかの確認
+      c['value'] = target[0] & (1 << e['position'])
+
+      # true_label, false_label が存在すればそれに設定。
+      # 存在しなければデフォルト値('ON', 'OFF')に設定。
+      if c['value'] != 0
+        c['value'] = e.fetch('true_label', 'ON')
+      else
+        c['value'] = e.fetch('false_label', 'OFF')
+      end
+      c
+    }
   end
 end
 

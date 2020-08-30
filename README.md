@@ -38,7 +38,7 @@
   type: UINT32
   endianness: LITTLE
 - name: UINT16_value
-  offset: 2
+  offset: 12
   size: 2
   type: UINT16
   endianness: LITTLE
@@ -53,29 +53,30 @@
 
 実行結果は以下のようになる。
 
-json 形式で出力されるので、 `jq` 等でよしなに pretty-print してください。
+```sh
+$ ruby binary_parser.rb -c setting.yaml example.bin
+  +--------------+-------------------+
+  | name         | value             |
+  +--------------+-------------------+
+  | UINT64_value | 72057594037927936 |
+  | UINT32_value | 16777216          |
+  | UINT16_value | 256               |
+  | UINT8_value  | 1                 |
+  +--------------+-------------------+
+```
+
+`-a` オプションで追加の情報が出力される。
 
 ```sh
-$ ruby binary_parser.rb -c setting.yaml example.bin | jq '.'
-[
-  {
-    "name": "UINT64_72057594037927936",
-    "offset": 0,
-    "size": 8,
-    "type": "UINT64",
-    "endianness": "LITTLE",
-    "value": 72057594037927940
-  },
-...(snip)
-  {
-    "name": "UINT8_value",
-    "offset": 14,
-    "size": 1,
-    "type": "UINT8",
-    "endianness": "LITTLE",
-    "value": 1
-  }
-]
+$ ruby binary_parser.rb -a -c setting.yaml example.bin
+  +------------+--------------+--------+------+--------+-------------------+
+  | endianness | name         | offset | size | type   | value             |
+  +------------+--------------+--------+------+--------+-------------------+
+  | LITTLE     | UINT64_value | 0      | 8    | UINT64 | 72057594037927936 |
+  | LITTLE     | UINT32_value | 8      | 4    | UINT32 | 16777216          |
+  | LITTLE     | UINT16_value | 12     | 2    | UINT16 | 256               |
+  | LITTLE     | UINT8_value  | 14     | 1    | UINT8  | 1                 |
+  +------------+--------------+--------+------+--------+-------------------+
 ```
 
 # TODO:
@@ -83,6 +84,6 @@ $ ruby binary_parser.rb -c setting.yaml example.bin | jq '.'
 - [x] : テーブル形式で表示
 - [ ] : 文字列型サポート
     - [ ] : UTF8
-- [ ] : ビットフラグサポート
+- [x] : ビットフラグサポート
 - [ ] : type からの size 自動設定
-
+- [ ] : json 形式で表示
