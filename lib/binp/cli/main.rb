@@ -42,10 +42,31 @@ class Main
         all: false
     }
     op = OptionParser.new
+    op.banner = 'Usage: binp [options] FILE'
 
     op.on('-c VALUE', '--config VALUE', '設定ファイルパス') { |v| options[:config] = v }
     op.on('-a', '--all', 'name, value 以外のすべての項目(endianness, offset, size, type)を表示する') { |v| options[:all] = true }
-    op.parse!(argv)
+    begin
+      op.parse!(argv)
+    rescue OptionParser::InvalidOption => e
+      STDERR.puts 'ERROR: オプションのパースに失敗しました。'
+      STDERR.puts op.to_s
+      exit(1);
+    end
+
+    # 必須オプション `-c` のチェック
+    unless options[:config]
+      STDERR.puts 'ERROR: 必須オプション `-c, --config` が指定されていません。'
+      STDERR.puts op.to_s
+      exit(1);
+    end
+
+    # ファイル指定があるかのチェック
+    if argv.size == 0
+      STDERR.puts 'ERROR: FILE が指定されていません。'
+      STDERR.puts op.to_s
+      exit(1);
+    end
 
     [options, argv]
   end
