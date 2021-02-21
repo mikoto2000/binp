@@ -151,6 +151,20 @@ class TestBinaryParserElement < Test::Unit::TestCase
       assert_equal(12345, actual)
     end
 
+    test "data: '\\30\\39' and {offset: 0, size: 2, type: UINT16, endianness: BIG_ENDIAN}, value_labels: {12345 => 'value is 12345'} is 'value is 12345'" do
+      data = [48, 57]
+
+      actual = BinParserElement.get_value(data, 0, 2, BinParserElement::Type::UINT16, BinParserElement::Endianness::BIG_ENDIAN, {12345 => 'value is 12345'})
+      assert_equal('value is 12345', actual)
+    end
+
+    test "data: '\\30\\39' and {offset: 0, size: 2, type: UINT16, endianness: BIG_ENDIAN}, value_labels: {54321 => 'value is 54321'} is '12345'" do
+      data = [48, 57]
+
+      actual = BinParserElement.get_value(data, 0, 2, BinParserElement::Type::UINT16, BinParserElement::Endianness::BIG_ENDIAN, {54321 => 'value is 54321'})
+      assert_equal(12345, actual)
+    end
+
     test "data: '\\39\\30' and {offset: 0, size: 2, type: UINT16, endianness: LITTLE_ENDIAN} is 12345" do
       data = [57, 48]
 

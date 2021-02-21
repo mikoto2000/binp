@@ -8,7 +8,7 @@ class BinParser
       if e['type'] == BinParserElement::Type::FLAGS
         e = BinParserElement.get_flags(uint8_array, e)
       else
-        e['value'] = BinParserElement.get_value(uint8_array, e['offset'], e['size'], e['type'], e['endianness'])
+        e['value'] = BinParserElement.get_value(uint8_array, e['offset'], e['size'], e['type'], e['endianness'], e['value_label'])
       end
       e
     }
@@ -79,11 +79,15 @@ class BinParserElement
     'C' * size
   end
 
-  def self.get_value(uint8_array, offset, size, type, endianness)
+  def self.get_value(uint8_array, offset, size, type, endianness, value_labels={})
     target = uint8_array.slice(offset, size)
     pack_template_string = calculate_pack_template_string(size)
     unpack_template_string = calculate_unpack_template_string(type, endianness)
-    target.pack(pack_template_string).unpack(unpack_template_string)[0]
+    value = target.pack(pack_template_string).unpack(unpack_template_string)[0]
+
+    # value_label が設定されている数値であれば、それに置き換える
+    value_labels ||= {}
+    value_labels.fetch(value, value)
   end
 
   def self.get_flags(uint8_array, config)

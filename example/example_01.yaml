@@ -59,6 +59,8 @@
   size: 1
   type: UINT8
   endianness: BIG
+  value_label:
+    136: one hundred thirty six
 - name: FLAGS
   offset: 31
   type: FLAGS
