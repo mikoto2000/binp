@@ -7,6 +7,14 @@
 
 # 使い方
 
+```sh
+Usage: binp [options] FILE
+    -c, --config VALUE               設定ファイルパス
+    -a, --all                        name, value 以外のすべての項目(endianness, offset, size, type)を表示する
+    -p, --polling VALUE              指定したポーリング間隔(ミリ秒)で再表示します
+    -w, --watch                      ファイル更新時に再表示します
+```
+
 以下内容のバイナリファイルをパースする場合について説明する。
 
 ■ `example.bin`
