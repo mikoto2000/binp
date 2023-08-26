@@ -10,23 +10,34 @@ require_relative '../../binp.rb'
 
 class Main
   def self.run(argv)
-    # 引数パース
-    opts, argv = parse_option(argv)
+    begin
+      # 引数パース
+      opts, argv = parse_option(argv)
 
-    # コンフィグファイル読み込み
-    config = read_config_file(opts[:config])
+      # コンフィグファイル読み込み
+      config = read_config_file(opts[:config])
 
-    # watch オプションを確認し、フラグがたっていれば watch モードで実行
-    if opts[:watch]
-      watch(config, opts[:all], argv[0])
-    else
-      display(config, opts[:all], argv[0], false)
+      # watch オプションを確認し、フラグがたっていれば watch モードで実行
+      if opts[:watch]
+        watch(config, opts[:all], argv[0])
+      elsif opts[:polling] != 0
+        interval = opts[:polling].to_f / 1000.0
+        loop do
+          display(config, opts[:all], argv[0], true)
+          sleep interval
+        end
+      else
+        display(config, opts[:all], argv[0], false)
+      end
+    rescue Interrupt
+      # do nothing
     end
   end
 
   def self.parse_option(argv)
     options = {
         all: false,
+        polling: 0,
         watch: false
     }
     op = OptionParser.new
@@ -34,6 +45,7 @@ class Main
 
     op.on('-c VALUE', '--config VALUE', '設定ファイルパス') { |v| options[:config] = v }
     op.on('-a', '--all', 'name, value 以外のすべての項目(endianness, offset, size, type)を表示する') { |v| options[:all] = true }
+    op.on('-p VALUE', '--polling VALUE', '指定したポーリング間隔(ミリ秒)で再表示します') { |v| options[:polling] = v }
     op.on('-w', '--watch', 'ファイル更新時に再表示します') { |v| options[:watch] = true }
     begin
       op.parse!(argv)
