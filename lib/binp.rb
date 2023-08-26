@@ -3,16 +3,17 @@ require "binp/version"
 
 class BinParser
   def self.parse(uint8_array, config)
-    config.flat_map { |e|
+    flatten_config = config.flat_map { |e|
+      new_e = e.clone
       # ビットフラグかどうかを確認
       if e['type'] == BinParserElement::Type::FLAGS
-        e = BinParserElement.get_flags(uint8_array, e)
+        new_e = BinParserElement.get_flags(uint8_array, e)
       else
-        e['value'] = BinParserElement.get_value(uint8_array, e['offset'], e['size'], e['type'], e['endianness'], e['value_label'])
+        new_e['value'] = BinParserElement.get_value(uint8_array, e['offset'], e['size'], e['type'], e['endianness'], e['value_label'])
       end
-      e
+      new_e
     }
-  end
+    end
 end
 
 class BinParserElement

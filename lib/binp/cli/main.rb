@@ -1,51 +1,52 @@
 # encoding: UTF-8
 require 'formatador'
 require 'json'
+require 'listen'
 require 'optparse'
+require 'pathname'
 require 'yaml'
 
 require_relative '../../binp.rb'
 
 class Main
   def self.run(argv)
-    # 引数パース
-    opts, argv = parse_option(argv)
+    begin
+      # 引数パース
+      opts, argv = parse_option(argv)
 
-    # ファイル読み込み
-    config = read_config_file(opts[:config])
-    uint8_array = read_binary_file(argv[0])
+      # コンフィグファイル読み込み
+      config = read_config_file(opts[:config])
 
-    # バイナリパース
-    raw_result = BinParser.parse(uint8_array, config)
-
-    # 出力用に加工して出力
-    result = raw_result.map { |e|
-      e['type'] = e['type'][:name]
-
-      # FLAGS では endianness が無い場合があるのでチェックしてから設定
-      if e['endianness']
-        e['endianness'] = e['endianness'][:name]
+      # watch オプションを確認し、フラグがたっていれば watch モードで実行
+      if opts[:watch]
+        watch(config, opts[:all], argv[0])
+      elsif opts[:polling] != 0
+        interval = opts[:polling].to_f / 1000.0
+        loop do
+          display(config, opts[:all], argv[0], true)
+          sleep interval
+        end
+      else
+        display(config, opts[:all], argv[0], false)
       end
-
-      # layout は出力量が多すぎるので削除
-      e.delete('layout')
-      e
-    }
-    if  !opts[:all]
-        result.map! { |e| { 'name' => e['name'], 'value' => e['value']} }
+    rescue Interrupt
+      # do nothing
     end
-    Formatador.display_compact_table(result)
   end
 
   def self.parse_option(argv)
     options = {
-        all: false
+        all: false,
+        polling: 0,
+        watch: false
     }
     op = OptionParser.new
     op.banner = 'Usage: binp [options] FILE'
 
     op.on('-c VALUE', '--config VALUE', '設定ファイルパス') { |v| options[:config] = v }
     op.on('-a', '--all', 'name, value 以外のすべての項目(endianness, offset, size, type)を表示する') { |v| options[:all] = true }
+    op.on('-p VALUE', '--polling VALUE', '指定したポーリング間隔(ミリ秒)で再表示します') { |v| options[:polling] = v }
+    op.on('-w', '--watch', 'ファイル更新時に再表示します') { |v| options[:watch] = true }
     begin
       op.parse!(argv)
     rescue OptionParser::InvalidOption => e
@@ -110,6 +111,69 @@ class Main
     File.open(binary_file_path, 'rb') { |f|
       f.each_byte.to_a
     }
+  end
+
+  # watch モード(指定されたファイルが更新されるたびに結果を出力する)
+  def self.watch(config, is_all, file)
+    # 初回の出力
+    display(config, is_all, file, true)
+    
+    # ファイルの変更を監視し、変更があればターミナルに出力
+    directory = Pathname.new(file).dirname.to_s
+    listener = Listen.to(directory) do |modified, _added, _removed|
+      modified_file = Pathname.new(modified.first).expand_path
+
+      # 変更されたファイルが監視対象でなければ何もしない
+      next unless modified_file == Pathname.new(file).expand_path
+
+      # 出力
+      display(config, is_all, modified_file, true)
+    end
+
+    listener.start
+    begin
+      sleep
+    rescue Interrupt
+      # do nothing
+    end
+  end
+
+  # バイナリファイルをパースして、出力用にフォーマットする
+  def self.parse_and_format(config, is_all, file)
+    uint8_array = read_binary_file(file);
+
+    # バイナリパース
+    raw_result = BinParser.parse(uint8_array, config)
+
+    # パース結果を出力用に加工
+    result = raw_result.map { |e|
+      e['type'] = e['type'][:name]
+
+      # FLAGS では endianness が無い場合があるのでチェックしてから設定
+      if e['endianness']
+        e['endianness'] = e['endianness'][:name]
+      end
+
+      # layout は出力量が多すぎるので削除
+      e.delete('layout')
+      e
+    }
+
+    # all フラグが立っていない場合、 name と value のみ抽出
+    if !is_all
+        result.map! { |e| { 'name' => e['name'], 'value' => e['value']} }
+    end
+
+    result
+  end
+
+  def self.display(config, is_all, file, is_reset)
+    # 表示用文字列を取得
+    result = parse_and_format(config, is_all, file)
+
+    # 一度ターミナルをリセットして表示し直す
+    printf "\033c" if is_reset
+    Formatador.display_compact_table(result)
   end
 end
 
