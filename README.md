@@ -15,6 +15,16 @@ Usage: binp [options] FILE
     -w, --watch                      ファイル更新時に再表示します
 ```
 
+# インストール方法
+
+gem コマンドでインストールしてください。
+
+```sh
+gem install binp
+```
+
+# 設定例
+
 以下内容のバイナリファイルをパースする場合について説明する。
 
 ■ `example.bin`
